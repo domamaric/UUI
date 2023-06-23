@@ -1,4 +1,3 @@
-import csv
 import numpy as np
 
 
@@ -14,12 +13,19 @@ def load_csv(filepath):
     filepath : str
         Path to .csv file
     """
-    with open(file=filepath, mode='r') as f:
-        matrix = [row for row in csv.reader(f)]
-        matrix.pop(0)
-        X = [[float(val) for val in row] for row in matrix]
+    X, Y = [], []
 
-    return np.array(X)
+    with open(file=filepath, mode='r') as f:
+        lines = [x.strip().split(',') for x in f.readlines()]
+
+        for row in lines[1:]:
+            features = row[:-1]
+            target = row[-1]
+
+            X.append(features)
+            Y.append(target)
+
+    return np.array(X, dtype=float), np.array(Y, dtype=float)
 
 
 # Activation functions

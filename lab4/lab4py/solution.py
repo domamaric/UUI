@@ -3,9 +3,9 @@ import nnlearn
 
 
 def main(argv):
-    X_train = nnlearn.load_csv(argv.train)
-    X_test = nnlearn.load_csv(argv.test)
-    breakpoint()
+    X_train, Y_train = nnlearn.load_csv(argv.train)
+    X_test, Y_test = nnlearn.load_csv(argv.test)
+
     input_dim = len(X_train[0]) - 1
 
     # Cascade through nn architecture
