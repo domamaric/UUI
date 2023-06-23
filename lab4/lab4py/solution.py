@@ -3,10 +3,10 @@ import nnlearn
 
 
 def main(argv):
-    X_train, Y_train = nnlearn.load_csv(argv.train)
-    X_test, Y_test = nnlearn.load_csv(argv.test)
-
-    input_dim = len(Y_train) - 1
+    X_train = nnlearn.load_csv(argv.train)
+    X_test = nnlearn.load_csv(argv.test)
+    breakpoint()
+    input_dim = len(X_train[0]) - 1
 
     # Cascade through nn architecture
     if argv.nn == '5s':
@@ -22,7 +22,7 @@ def main(argv):
                                    hidden_dims=[5, 5],
                                    output_dim=1)
 
-    nn.train(train=X_train, k=argv.k, epochs=argv.iter, popsize=argv.popsize,
+    nn.train(data=X_train, k=argv.K, epochs=argv.iter, popsize=argv.popsize,
              prob=argv.p, elit=argv.elitism)
 
 
