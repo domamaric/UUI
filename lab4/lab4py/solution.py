@@ -6,6 +6,25 @@ def main(argv):
     X_train, Y_train = nnlearn.load_csv(argv.train)
     X_test, Y_test = nnlearn.load_csv(argv.test)
 
+    input_dim = len(Y_train) - 1
+
+    # Cascade through nn architecture
+    if argv.nn == '5s':
+        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
+                                   hidden_dims=[5],
+                                   output_dim=1)
+    elif argv.nn == '20s':
+        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
+                                   hidden_dims=[20],
+                                   output_dim=1)
+    elif argv.nn == '5s5s':
+        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
+                                   hidden_dims=[5, 5],
+                                   output_dim=1)
+
+    nn.train(train=X_train, k=argv.k, epochs=argv.iter, popsize=argv.popsize,
+             prob=argv.p, elit=argv.elitism)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='solution.py',
