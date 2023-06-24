@@ -6,24 +6,24 @@ def main(argv):
     X_train, Y_train = nnlearn.load_csv(argv.train)
     X_test, Y_test = nnlearn.load_csv(argv.test)
 
-    input_dim = len(X_train[0]) - 1
+    input_dim = len(X_train[0])
 
     # Cascade through nn architecture
     if argv.nn == '5s':
-        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
-                                   hidden_dims=[5],
-                                   output_dim=1)
+        hidden_dims = [5]
     elif argv.nn == '20s':
-        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
-                                   hidden_dims=[20],
-                                   output_dim=1)
+        hidden_dims = [20]
     elif argv.nn == '5s5s':
-        nn = nnlearn.NeuralNetwork(input_dim=input_dim,
-                                   hidden_dims=[5, 5],
-                                   output_dim=1)
+        hidden_dims = [5, 5]
 
-    nn.train(data=X_train, k=argv.K, epochs=argv.iter, popsize=argv.popsize,
-             prob=argv.p, elit=argv.elitism)
+    population = nnlearn.Population(popsize=argv.popsize, input_dim=input_dim,
+                                    hidden_dims=hidden_dims, output_dim=1)
+
+    population.train(X=X_train, y=Y_train, epochs=argv.iter,
+                     K=argv.K, p=argv.p, elit=argv.elitism)
+
+    error = population.evaluate(X_test, Y_test)
+    print(f"[Test error]: {error}")
 
 
 if __name__ == "__main__":
