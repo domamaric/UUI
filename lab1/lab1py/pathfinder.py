@@ -51,12 +51,31 @@ def remove_comments(file_lines):
     return removed_comments
 
 
-def is_optimistic():
-    pass
+def is_optimistic(heuristic, state_space, goal):
+    no_of_errors = 0
+    for state, val in heuristic.items():
+        try:
+            algorithm = Ucs(state_space)
+            _, cost = algorithm.search(state, goal)
+            cost = float(cost)
+            if val <= cost:
+                print(
+                    f"[CONDITION]: [OK] h({state}) <= h*: {val} <= {cost}")
+            else:
+                print(f"[CONDITION]: [ERR] h({state}) <= h*: {val} <= {cost}")
+                no_of_errors += 1
+        except AttributeError:
+            print(f"[CONDITION]: [OK] h({state}) <= h*: {val} <= {val}")
+
+    return no_of_errors == 0
 
 
-def is_consistent():
-    pass
+def is_consistent(heuristic, state_space):
+    for state, successors in state_space.items():
+        for successor, cost in successors:
+            if heuristic[state] + cost > heuristic[successor]:
+                return False
+    return True
 
 
 class Algorithm:

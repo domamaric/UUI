@@ -20,24 +20,34 @@ def main(argv):
         algorithm = pathfinder.Astar(sts, heuristic)
 
     # Do a state search
-    path, cost = algorithm.search(initial, target)
-    if path is not None:
-        print('[FOUND_SOLUTION]: yes')
-        print('[STATES_VISITED]:', 10)
-        print('[PATH_LENGTH]:', len(path))
-        print('[TOTAL_COST]:', cost)
-        print('[PATH]:', ' => '.join(path))
-    else:
-        print('[FOUND_SOLUTION]: no')
-        print('[STATES_VISITED]:', 0)
-        print('[PATH_LENGTH]: 0')
-        print('[TOTAL_COST]:', cost)
-        print('[PATH]:')
+    if search_alg is not None:
+        path, cost = algorithm.search(initial, target)
+        if path is not None:
+            print('[FOUND_SOLUTION]: yes')
+            print('[STATES_VISITED]:', 10)
+            print('[PATH_LENGTH]:', len(path))
+            print('[TOTAL_COST]:', cost)
+            print('[PATH]:', ' => '.join(path))
 
     if argv.check_optimistic:
-        pass
+        print('# HEURISTIC-OPTIMISTIC', argv.h)
+        heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
+        optimistic = pathfinder.is_optimistic(heuristic, sts, target)
+
+        if optimistic:
+            print('[CONCLUSION]: Heuristic is optimistic.')
+        else:
+            print('[CONCLUSION]: Heuristic is not optimistic.')
+
     if argv.check_consistent:
-        pass
+        print('# HEURISTIC-OPTIMISTIC', argv.h)
+        heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
+        consistent = pathfinder.is_consistent(heuristic, sts)
+
+        if consistent:
+            print('[CONCLUSION]: Heuristic is consistent.')
+        else:
+            print('[CONCLUSION]: Heuristic is not consistent.')
 
 
 if __name__ == '__main__':
