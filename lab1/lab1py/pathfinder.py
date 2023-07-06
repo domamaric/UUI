@@ -75,20 +75,20 @@ def is_consistent(heuristic, state_space):
 
     for state, transitions in state_space.items():
         for transition in transitions:
-            st, cost = transition
-            for k, heur_val in heuristic.items():
-                if k == state:
-                    for y, h2 in heuristic.items():
-                        if y == st:
-                            if heur_val <= h2 + cost:
-                                print(
-                                    "[CONDITION]: [OK] h({}) <= h({}) + c: {} <= {} + {}".format(k, st, heur_val, h2, cost))
-                            else:
-                                print(
-                                    "[CONDITION]: [ERR] h({}) <= h({}) + c: {} <= {} + {}".format(k, st, heur_val, h2, cost))
-                                no_of_errors += 1
-                            break
-                    break
+            successor_state, cost = transition
+            state_heuristic = heuristic.get(state)
+
+            if state_heuristic is not None:
+                for successor, successor_heuristic in heuristic.items():
+                    if successor == successor_state:
+                        if state_heuristic <= successor_heuristic + cost:
+                            print(
+                                f"[CONDITION]: [OK] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
+                        else:
+                            print(
+                                f"[CONDITION]: [ERR] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
+                            no_of_errors += 1
+                        break
 
     return no_of_errors == 0
 
