@@ -10,7 +10,7 @@ def read_space_state(path):
         file_lines = remove_comments([x for x in f.readlines()])
 
         initial_state = file_lines[0]
-        target_state = file_lines[1]
+        target_states = file_lines[1].split()
 
         for line in file_lines[2:]:
             state, successors = line.split(':')
@@ -23,7 +23,7 @@ def read_space_state(path):
                 successor_list.append((next_state, float(cost)))
             successor_dict[state] = successor_list
 
-    return successor_dict, initial_state, target_state
+    return successor_dict, initial_state, target_states
 
 
 def read_heuristic(path):
@@ -82,8 +82,8 @@ class Astar(Algorithm):
         while open_set:
             current_cost, current_node = heapq.heappop(open_set)
 
-            if current_node == goal:
-                return super().reconstruct_path(parent, current_node), g[goal]
+            if current_node in goal:
+                return super().reconstruct_path(parent, current_node), g[current_node]
 
             closed_set.add(current_node)
 
