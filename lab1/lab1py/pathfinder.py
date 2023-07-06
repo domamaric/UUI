@@ -1,4 +1,5 @@
 import heapq
+from collections import deque
 
 
 def read_space_state(path):
@@ -50,6 +51,14 @@ def remove_comments(file_lines):
     return removed_comments
 
 
+def is_optimistic():
+    pass
+
+
+def is_consistent():
+    pass
+
+
 class Algorithm:
     def __init__(self, state_space):
         self.state_space = state_space
@@ -66,6 +75,59 @@ class Algorithm:
         path.reverse()
 
         return path
+
+
+class Bfs(Algorithm):
+    def __init__(self, state_space):
+        super().__init__(state_space)
+
+    def search(self, start, goal):
+        queue = deque([(start, [])])
+        visited = set()
+        parent = {}
+
+        while queue:
+            current_node, path = queue.popleft()
+            if current_node in goal:
+                # breakpoint()
+                return path + [current_node], 0.0
+
+            visited.add(current_node)
+
+            for successor, _ in self.state_space[current_node]:
+                if successor not in visited:
+                    queue.append((successor, path + [current_node]))
+                    parent[successor] = current_node
+
+        return None
+
+
+class Ucs(Algorithm):
+    def __init__(self, state_space):
+        super().__init__(state_space)
+
+    def search(self, start, goal):
+        priority_queue = [(0, start)]
+        visited = set()
+        g = {start: 0}
+        parent = {}
+
+        while priority_queue:
+            current_cost, current_node = heapq.heappop(priority_queue)
+
+            if current_node in goal:
+                return super().reconstruct_path(parent, current_node), g[current_node]
+
+            visited.add(current_node)
+
+            for successor, cost in self.state_space[current_node]:
+                new_cost = g[current_node] + cost
+                if successor not in visited and (successor not in g or new_cost < g[successor]):
+                    g[successor] = new_cost
+                    heapq.heappush(priority_queue, (new_cost, successor))
+                    parent[successor] = current_node
+
+        return None
 
 
 class Astar(Algorithm):

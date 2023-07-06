@@ -12,10 +12,9 @@ def main(argv):
     # pprint.pprint(sts)
 
     if search_alg == 'bfs':
-        pass  # Do BFS stuff
+        algorithm = pathfinder.Bfs(sts)
     elif search_alg == 'ucs':
-        # Read heuristic
-        pass  # Do UCS stuff
+        algorithm = pathfinder.Ucs(sts)
     elif search_alg == 'astar':
         heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
         algorithm = pathfinder.Astar(sts, heuristic)
