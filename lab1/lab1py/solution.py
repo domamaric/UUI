@@ -40,7 +40,7 @@ def main(argv):
             print('[CONCLUSION]: Heuristic is not optimistic.')
 
     if argv.check_consistent:
-        print('# HEURISTIC-OPTIMISTIC', argv.h)
+        print('# HEURISTIC-CONSISTENT', argv.h)
         heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
         consistent = pathfinder.is_consistent(heuristic, sts)
 

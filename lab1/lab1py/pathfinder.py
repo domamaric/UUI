@@ -71,11 +71,26 @@ def is_optimistic(heuristic, state_space, goal):
 
 
 def is_consistent(heuristic, state_space):
-    for state, successors in state_space.items():
-        for successor, cost in successors:
-            if heuristic[state] + cost > heuristic[successor]:
-                return False
-    return True
+    no_of_errors = 0
+
+    for state, transitions in state_space.items():
+        for transition in transitions:
+            st, cost = transition
+            for k, heur_val in heuristic.items():
+                if k == state:
+                    for y, h2 in heuristic.items():
+                        if y == st:
+                            if heur_val <= h2 + cost:
+                                print(
+                                    "[CONDITION]: [OK] h({}) <= h({}) + c: {} <= {} + {}".format(k, st, heur_val, h2, cost))
+                            else:
+                                print(
+                                    "[CONDITION]: [ERR] h({}) <= h({}) + c: {} <= {} + {}".format(k, st, heur_val, h2, cost))
+                                no_of_errors += 1
+                            break
+                    break
+
+    return no_of_errors == 0
 
 
 class Algorithm:
