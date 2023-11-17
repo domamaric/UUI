@@ -53,6 +53,7 @@ def remove_comments(file_lines):
 
 def is_optimistic(heuristic, state_space, goal):
     no_of_errors = 0
+
     for state, val in heuristic.items():
         try:
             algorithm = Ucs(state_space)
@@ -74,23 +75,19 @@ def is_consistent(heuristic, state_space):
     no_of_errors = 0
 
     for state, transitions in state_space.items():
-        for transition in transitions:
-            successor_state, cost = transition
-            state_heuristic = heuristic.get(state)
+        state_heuristic = heuristic.get(state)
 
-            if state_heuristic is not None:
-                for successor, successor_heuristic in heuristic.items():
-                    if successor == successor_state:
-                        if state_heuristic <= successor_heuristic + cost:
-                            print(
-                                f"[CONDITION]: [OK] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
-                        else:
-                            print(
-                                f"[CONDITION]: [ERR] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
-                            no_of_errors += 1
-                        break
+        if state_heuristic is not None:
+            for successor_state, cost in transitions:
+                successor_heuristic = heuristic.get(successor_state)
+                if successor_heuristic is not None and state_heuristic > successor_heuristic + cost:
+                    print(f"[CONDITION]: [ERR] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
+                    no_of_errors += 1
+                else:
+                    print(f"[CONDITION]: [OK] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
 
     return no_of_errors == 0
+
 
 
 class Algorithm:
@@ -123,7 +120,6 @@ class Bfs(Algorithm):
         while queue:
             current_node, path = queue.popleft()
             if current_node in goal:
-                # breakpoint()
                 return path + [current_node], 0.0
 
             visited.add(current_node)
@@ -146,17 +142,21 @@ class Ucs(Algorithm):
         g = {start: 0}
         parent = {}
 
+        goal_set = set(goal)  # Convert goal to a set for faster membership check
+
         while priority_queue:
             current_cost, current_node = heapq.heappop(priority_queue)
 
-            if current_node in goal:
+            if current_node in goal_set:
                 return super().reconstruct_path(parent, current_node), g[current_node]
 
             visited.add(current_node)
 
             for successor, cost in self.state_space[current_node]:
                 new_cost = g[current_node] + cost
-                if successor not in visited and (successor not in g or new_cost < g[successor]):
+                successor_cost = g.get(successor, float('inf'))
+
+                if successor not in visited and new_cost < successor_cost:
                     g[successor] = new_cost
                     heapq.heappush(priority_queue, (new_cost, successor))
                     parent[successor] = current_node

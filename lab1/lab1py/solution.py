@@ -2,14 +2,11 @@ import argparse
 import os
 import pathlib  # It is better to provide Path object than pure string
 import pathfinder
-import pprint
 
 
 def main(argv):
     sts, initial, target = pathfinder.read_space_state(pathlib.Path(argv.ss))
     search_alg = argv.alg
-
-    # pprint.pprint(sts)
 
     if search_alg == 'bfs':
         algorithm = pathfinder.Bfs(sts)
