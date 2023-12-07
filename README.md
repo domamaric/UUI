@@ -25,7 +25,7 @@ This repository contains the solutions for four programming assignments in the "
 
 ### Prerequisites
 
-- [List any prerequisites or dependencies necessary to run the code]
+- Python 3.8 or greater and numpy library for 4th lab assignment 
 
 ### Installation
 
