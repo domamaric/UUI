@@ -1,8 +1,8 @@
-import math
-from collections import Counter
-from pprint import pprint
 import csv
+import math
 import sys
+
+from collections import Counter
 
 
 class ID3():
@@ -112,16 +112,16 @@ class ID3():
         return predictions
 
 
-def print_tree(tree, depth=1, path=''):
-    if isinstance(tree, dict):
-        for key, value in tree.items():
-            new_path = f'{path} {key}'
-            if isinstance(value, dict):
-                print_tree(value, depth + 1, new_path)
-            else:
-                print(f'{depth}={new_path} {value}')
-    else:
-        print(f'{depth}:{path} {tree}')
+def print_tree(tree, depth=1, path=""):
+    root = list(tree.keys())[0]
+    subtree = tree[root]
+    path += f"{depth}:{root}"
+    
+    for key in subtree:
+        if isinstance(subtree[key], dict):
+            print_tree(subtree[key], depth + 1, path + f"={key} ")
+        elif isinstance(subtree[key], str):
+            print(f"{path}={key} {subtree[key]}")
 
 
 def conf_mat(actual, predicted):
@@ -131,7 +131,8 @@ def conf_mat(actual, predicted):
     map_labels = {key: i for i, key in enumerate(unique)}
 
     for p, a in zip(predicted, actual):
-        matrix[map_labels[p]][map_labels[a]] += 1
+        if p in map_labels:
+            matrix[map_labels[p]][map_labels[a]] += 1
 
     return matrix
 
@@ -154,7 +155,6 @@ if __name__ == '__main__':
 
     dt = ID3()
     dt.train(data, attributes)
-    pprint(dt.decision_tree)
     print("[BRANCHES]:")
     # Rekurzivno iteriraj po cvorovima
     print_tree(dt.decision_tree)
