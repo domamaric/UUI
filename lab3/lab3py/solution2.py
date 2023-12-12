@@ -1,4 +1,5 @@
 import csv
+import heapq
 import math
 import sys
 
@@ -8,6 +9,7 @@ from collections import Counter
 class ID3():
     def __init__(self):
         self.decision_tree = None
+        self.labels = None
 
     def entropy(self, data):
         labels = [item[-1] for item in data]
@@ -56,19 +58,12 @@ class ID3():
 
         return best_attribute
 
-    def majority_vote(self, labels):
-        label_counts = counter(labels)
-        majority_labels = label_counts.most_common(1)[0][0]
-        return majority_labels
 
     def create_decision_tree(self, data, attributes):
         labels = [item[-1] for item in data]
 
         if labels.count(labels[0]) == len(labels):
             return labels[0]
-
-        if len(attributes) == 0:
-            return self.majority_vote(labels)
 
         best_attribute = self.select_best_attribute(data)
         best_attribute_label = attributes[best_attribute]
@@ -87,6 +82,8 @@ class ID3():
         return decision_tree
 
     def train(self, data, attributes):
+        self.labels = [row[-1] for row in data]
+        heapq.heapify(self.labels)
         self.decision_tree = self.create_decision_tree(data, attributes)
 
     def predict_single(self, sample, decision_tree):
@@ -97,7 +94,9 @@ class ID3():
         value = sample[attribute]
 
         if value not in decision_tree[attribute]:
-            return None
+            label_counts = Counter(self.labels)
+            majority_labels = label_counts.most_common(1)[0][0]
+            return majority_labels
 
         subtree = decision_tree[attribute][value]
         return self.predict_single(sample, subtree)
