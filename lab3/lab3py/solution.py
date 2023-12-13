@@ -1,27 +1,36 @@
 import csv
+import pathlib
 import sys
 
 import id3_craftsman as id3
 
 
-if __name__ == '__main__':
-    with open(sys.argv[1], 'r') as f:
-        read_data = [x.strip().split(',') for x in f.readlines()]
+def read_train(filepath):
+    with open(filepath) as f:
+        data = [row for row in csv.reader(f)]
+    return data
 
-    data = read_data[1:]
-    attributes = read_data[0]
 
-    new_samples = []
-    actual_values = []
-    with open(sys.argv[2], 'r') as f2:
-        reader = csv.DictReader(f2)
+def read_test(filepath):
+    with open(filepath) as f:
+        new_samples, actual_values = [], []
+        reader = csv.DictReader(f)
         for row in reader:
-            key, value = row.popitem()
-            actual_values.append(value)
+            _, val = row.popitem()
             new_samples.append(row)
+            actual_values.append(val)
+    return new_samples, actual_values
+
+
+if __name__ == '__main__':    
+    train_filepath = pathlib.Path(sys.argv[1])
+    test_filepath = pathlib.Path(sys.argv[2])
+
+    train_dataset = read_train(train_filepath)
+    test_dataset, actual_values = read_test(test_filepath)
 
     model = id3.ID3()
-    model.fit(data, attributes)
-    predictions = model.predict(new_samples)
+    model.fit(train_dataset)
+    predictions = model.predict(test_dataset)
     print("[PREDICTIONS]:", *predictions)
     id3.get_model_stats(actual_values, predictions)

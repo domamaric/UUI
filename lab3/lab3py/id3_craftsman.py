@@ -79,11 +79,13 @@ class ID3():
 
         return decision_tree
 
-    def fit(self, data, attributes):
+    def fit(self, train_data):
+        attributes = train_data[0]
+        data = train_data[1:]
         self.labels = [row[-1] for row in data]
         heapq.heapify(self.labels)  # Linear complexity instead of n*logn
-        self.decision_tree = self.create_decision_tree(data, attributes)
 
+        self.decision_tree = self.create_decision_tree(data, attributes)
         print("[BRANCHES]:")
         self.print_tree(self.decision_tree)
 
