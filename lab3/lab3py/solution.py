@@ -1,29 +1,27 @@
-from ferlearn import ID3
-import koalas as kl
+import csv
 import sys
 
-
-def main():
-    train_dataset = kl.read_csv(sys.argv[1])
-    validation_dataset = kl.read_csv(sys.argv[2])
-    depth = None
-
-    try:
-        depth = sys.argv[3]
-    except IndexError as e:
-        pass
-
-    model = ID3(train_data=train_dataset.x_train,
-                feature_names=train_dataset.features,
-                labels=train_dataset.y_train)
-    model.fit()
-    predictions = model.predict(test_data=validation_dataset.x_train,
-                                test_labels=validation_dataset.features)
-
-    print("[PREDICTIONS]:", *predictions)
-    model.print_accuracy(predictions, validation_dataset.y_train)
-    model.print_conf_mat(validation_dataset.y_train, predictions)
+import id3_craftsman as id3
 
 
 if __name__ == '__main__':
-    main()
+    with open(sys.argv[1], 'r') as f:
+        read_data = [x.strip().split(',') for x in f.readlines()]
+
+    data = read_data[1:]
+    attributes = read_data[0]
+
+    new_samples = []
+    actual_values = []
+    with open(sys.argv[2], 'r') as f2:
+        reader = csv.DictReader(f2)
+        for row in reader:
+            key, value = row.popitem()
+            actual_values.append(value)
+            new_samples.append(row)
+
+    model = id3.ID3()
+    model.fit(data, attributes)
+    predictions = model.predict(new_samples)
+    print("[PREDICTIONS]:", *predictions)
+    id3.get_model_stats(actual_values, predictions)
