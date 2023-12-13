@@ -57,11 +57,16 @@ class ID3():
         return best_attribute
 
 
-    def create_decision_tree(self, data, attributes):
+    def create_decision_tree(self, data, attributes, curr_depth=1):
         labels = [item[-1] for item in data]
 
         if labels.count(labels[0]) == len(labels):
             return labels[0]
+
+        if self.depth is not None and curr_depth > self.depth:
+            label_counts = Counter(sorted(labels))
+            majority_vote = label_counts.most_common(1)[0][0]
+            return majority_vote
 
         best_attribute = self.select_best_attribute(data)
         best_attribute_label = attributes[best_attribute]
@@ -75,15 +80,16 @@ class ID3():
                 attributes[best_attribute + 1:]
             sub_data = self.split_data(data, best_attribute, value)
             decision_tree[best_attribute_label][value] = self.create_decision_tree(
-                sub_data, sub_attributes)
+                sub_data, sub_attributes, curr_depth + 1)
 
         return decision_tree
 
-    def fit(self, train_data):
-        attributes = train_data[0]
+    def fit(self, train_data, depth):
+        attributes = train_data[0][:-1]
         data = train_data[1:]
         self.labels = [row[-1] for row in data]
         heapq.heapify(self.labels)  # Linear complexity instead of n*logn
+        self.depth = depth
 
         self.decision_tree = self.create_decision_tree(data, attributes)
         print("[BRANCHES]:")

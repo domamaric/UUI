@@ -28,9 +28,14 @@ if __name__ == '__main__':
 
     train_dataset = read_train(train_filepath)
     test_dataset, actual_values = read_test(test_filepath)
+    
+    if len(sys.argv) == 4:  # Depth param
+        max_depth = int(sys.argv[3])
+    else:
+        max_depth = None
 
     model = id3.ID3()
-    model.fit(train_dataset)
+    model.fit(train_dataset, depth=max_depth)
     predictions = model.predict(test_dataset)
     print("[PREDICTIONS]:", *predictions)
     id3.get_model_stats(actual_values, predictions)
