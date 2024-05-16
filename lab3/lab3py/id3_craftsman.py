@@ -4,7 +4,7 @@ import math
 from collections import Counter
 
 
-class ID3():
+class ID3:
     def __init__(self):
         self.decision_tree = None
         self.labels = None
@@ -26,8 +26,7 @@ class ID3():
 
         for item in data:
             if item[attribute_index] == attribute_value:
-                reduced_item = item[:attribute_index] + \
-                    item[attribute_index + 1:]
+                reduced_item = item[:attribute_index] + item[attribute_index + 1 :]
                 split_data.append(reduced_item)
 
         return split_data
@@ -56,7 +55,6 @@ class ID3():
 
         return best_attribute
 
-
     def create_decision_tree(self, data, attributes, curr_depth=1):
         labels = [item[-1] for item in data]
 
@@ -76,11 +74,13 @@ class ID3():
         unique_values = set(attribute_values)
 
         for value in unique_values:
-            sub_attributes = attributes[:best_attribute] + \
-                attributes[best_attribute + 1:]
+            sub_attributes = (
+                attributes[:best_attribute] + attributes[best_attribute + 1 :]
+            )
             sub_data = self.split_data(data, best_attribute, value)
             decision_tree[best_attribute_label][value] = self.create_decision_tree(
-                sub_data, sub_attributes, curr_depth + 1)
+                sub_data, sub_attributes, curr_depth + 1
+            )
 
         return decision_tree
 
@@ -119,12 +119,11 @@ class ID3():
 
         return predictions
 
-
     def print_tree(self, decision_tree, depth=1, path=""):
         root = list(decision_tree.keys())[0]
         subtree = decision_tree[root]
         path += f"{depth}:{root}"
-        
+
         for key in subtree:
             if isinstance(subtree[key], dict):
                 self.print_tree(subtree[key], depth + 1, path + f"={key} ")
@@ -134,12 +133,17 @@ class ID3():
 
 def create_conf_matrix(actual, predicted):
     unique = sorted(set(actual))
-    matrix = [[sum(1 for p, a in zip(predicted, actual) if p == y and a == x) for x in unique] for y in unique]
+    matrix = [
+        [sum(1 for p, a in zip(predicted, actual) if p == y and a == x) for x in unique]
+        for y in unique
+    ]
     return matrix
 
 
 def get_model_stats(actual_values, predictions):
-    accuracy = sum(1 for x in zip(predictions, actual_values) if x[0] == x[1]) / len(predictions)
+    accuracy = sum(1 for x in zip(predictions, actual_values) if x[0] == x[1]) / len(
+        predictions
+    )
     print("[ACCURACY]: {:.5f}".format(accuracy))
 
     confusion_matrix = create_conf_matrix(actual_values, predictions)
@@ -149,4 +153,3 @@ def get_model_stats(actual_values, predictions):
         for y in range(len(unique)):
             print(confusion_matrix[y][x], end=" ")
         print()
-
