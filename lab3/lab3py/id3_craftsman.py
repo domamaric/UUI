@@ -1,3 +1,33 @@
+"""
+ID3 Algorithm Implementation
+
+This module provides a Python implementation of the ID3 decision tree learning algorithm.
+Constructs decision trees from a dataset using recursive divide et impera approach.
+
+Classes:
+    ID3: A class representing the ID3 algorithm functionalities.
+        - entropy: Calculate the entropy of a given dataset.
+        - split_data: Split the dataset based on a specific attribute value.
+        - select_best_attribute: Select the best attribute to split the dataset on.
+        - create_decision_tree: Recursively create the decision tree.
+        - fit: Fit the ID3 model to the training data.
+        - predict: Predict the labels for new samples.
+        - print_tree: Print the decision tree structure.
+
+Functions:
+    create_conf_matrix: Create a confusion matrix based on actual and predicted values.
+    get_model_stats: Calculate and print model statistics such as accuracy and confusion matrix.
+
+Example Usage:
+    id3_classifier = ID3()  # Instantiate ID3 classifier
+
+    id3_classifier.fit(train_data, depth=3)  # Fit the classifier to training data
+
+    predictions = id3_classifier.predict(test_data)  # Predict labels for test data
+
+    get_model_stats(actual_values, predictions)  # Get model statistics
+"""
+
 import heapq
 import math
 
