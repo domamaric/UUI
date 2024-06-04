@@ -9,17 +9,7 @@ def sigmoid(x):
 
 
 def load_csv(filepath):
-    """Read csv file and split it into features and targets.
-
-    Truncate first row since it contains only labels and cast all other string
-    values to float. Returns 2D matrices for features and target values as
-    ``np.array`` objects.
-
-    Parameters
-    ----------
-    filepath : str
-        Path to .csv file
-    """
+    """Read csv file and split it into features and targets."""
     X, Y = [], []
 
     with open(file=filepath, mode='r') as f:
@@ -38,11 +28,9 @@ def load_csv(filepath):
 class NeuralNetwork:
     """Neural network class implementation.
 
-    It has an initialization method that takes the dimensions of the input,
-    hidden, and output layers. The weights and biases are randomly initialized
-    from normal distribution with 0.01 standard deviation in the constructor.
+    The weights and biases are randomly initialized from normal distribution
+    with 0.01 standard deviation in the constructor.
     """
-
     def __init__(self, input_dim, hidden_dims, output_dim):
         self.biases = []
         self.weights = []
@@ -51,10 +39,8 @@ class NeuralNetwork:
         layer_dims = [input_dim] + hidden_dims + [output_dim]
 
         for i in range(len(layer_dims) - 1):
-            self.weights.append(
-                np.random.normal(loc=0, scale=0.01,
-                                 size=(layer_dims[i + 1], layer_dims[i]))
-            )
+            self.weights.append(np.random.normal(loc=0,scale=0.01,
+                                 size=(layer_dims[i + 1], layer_dims[i])))
             self.biases.append(np.random.normal(loc=0, scale=0.01,
                                                 size=(layer_dims[i + 1])))
 
@@ -66,6 +52,7 @@ class NeuralNetwork:
 
 
 class Population:
+    """Population class implementation."""
     def __init__(self, popsize, input_dim, hidden_dims, output_dim):
         self.input_dim = input_dim
         self.hidden_dims = hidden_dims
@@ -156,16 +143,18 @@ class Population:
     def evaluate(self, X, y):
         """ Forward propagation on the best individual in the population """
         best_nn = min(self.population, key=lambda nn: nn.diff_squared)
+        total_diff_squared = 0.0
 
-        outputs = X
-        for i, (weights, biases) in enumerate(zip(best_nn.weights,
-                                                  best_nn.biases)):
-            outputs = np.dot(outputs, weights.T) + biases
+        for x, target in zip(X, y):
+            outputs = x
 
-            # Skip sigmoid for last layer
-            if i != len(best_nn.weights) - 1:
-                outputs = sigmoid(outputs)
+            for i, (weights, biases) in enumerate(zip(best_nn.weights, best_nn.biases)):
+                outputs = np.dot(outputs, weights.T) + biases
 
-        diff_squared = np.mean(np.square(y - outputs))
+                if i != len(best_nn.weights) - 1:  # Skip sigmoid for last layer
+                    outputs = sigmoid(outputs)
 
-        return diff_squared
+            diff_squared = np.mean(np.square(target - outputs))
+            total_diff_squared += diff_squared
+
+        return total_diff_squared / len(X)
