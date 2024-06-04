@@ -34,7 +34,7 @@ class NeuralNetwork:
     def __init__(self, input_dim, hidden_dims, output_dim):
         self.biases = []
         self.weights = []
-        self.diff_squared = float('inf')
+        self.mse = float('inf')
 
         layer_dims = [input_dim] + hidden_dims + [output_dim]
 
@@ -45,10 +45,10 @@ class NeuralNetwork:
                                                 size=(layer_dims[i + 1])))
 
     def __repr__(self):
-        return f"{self.diff_squared}\n"
+        return f"{self.mse}\n"
 
     def __str__(self):
-        return f"{self.diff_squared}\n"
+        return f"{self.mse}\n"
 
 
 class Population:
@@ -73,8 +73,10 @@ class Population:
 
     def _propagation(self, X, y):
         """Performs forward propagation for each neural network."""
+        length = len(X)
+
         for nn in self.population:
-            total_diff_squared = 0.0
+            total_mse = 0.0
 
             for x, target in zip(X, y):
                 outputs = x
@@ -85,31 +87,27 @@ class Population:
                     if i != len(nn.weights) - 1:  # Skip sigmoid for last layer
                         outputs = sigmoid(outputs)
 
-                diff_squared = np.mean(np.square(target - outputs))
-                total_diff_squared += diff_squared
+                mse = np.mean(np.square(target - outputs))
+                total_mse += mse
 
-            nn.diff_squared = total_diff_squared / len(X)
+            nn.mse = total_mse / length
 
-    def _crossing(self, sorted_population):
+    def _crossing(self, elit_population):
         """Perform crossing for generating new individuals."""
         new_population = []
 
         while len(new_population) < self.popsize:
-            neural_network1 = random.choice(sorted_population)
-
-            if len(new_population) == 0:
-                neural_network2 = random.choice(sorted_population)
-            else:
-                neural_network2 = random.choice(new_population)
+            nn1 = random.choice(elit_population)
+            nn2 = random.choice(elit_population)
 
             # Create copies of weights and biases
-            new_weights = [(n1 + n2) / 2 for n1, n2 in zip(neural_network1.weights, neural_network2.weights)]
-            new_biases = [(n1 + n2) / 2 for n1, n2 in zip(neural_network1.biases, neural_network2.biases)]
+            new_weights = [(w1 + w2) / 2 for w1, w2 in zip(nn1.weights, nn2.weights)]
+            new_biases = [(b1 + b2) / 2 for b1, b2 in zip(nn1.biases, nn2.biases)]
 
-            nn = NeuralNetwork(self.input_dim, self.hidden_dims, self.output_dim)
-            nn.weights = new_weights
-            nn.biases = new_biases
-            new_population.append(nn)
+            new_nn = NeuralNetwork(self.input_dim, self.hidden_dims, self.output_dim)
+            new_nn.weights = new_weights
+            new_nn.biases = new_biases
+            new_population.append(new_nn)
 
         return new_population
 
@@ -123,27 +121,24 @@ class Population:
                 bias += np.random.normal(0, K, size=bias.shape) * (np.random.random() < p)
 
     def train(self, X, y, epochs, K, p, elit):
-        """ Performs training using Genetic Algorithm. """
+        """Performs training using Genetic Algorithm. """
         for i in range(1, epochs + 1):
             self._propagation(X, y)
 
-            if i % 2000 == 0:  # Every 100 iteration print current train error
-                best_population = min(self.population, key=lambda nn: nn.diff_squared)
-                print(f"[Train error @{i}]: {best_population.diff_squared}")
+            if i % 2000 == 0:  # Every 2000 iteration print current train error
+                best_population = min(self.population, key=lambda nn: nn.mse)
+                print(f"[Train error @{i}]: {best_population.mse}")
 
             # Elitism and selection
-            sorted_population = sorted(self.population, key=lambda nn: nn.diff_squared)[:elit]
-
-            new_population = self._crossing(sorted_population)
-
+            elit_population = sorted(self.population, key=lambda nn: nn.mse)[:elit]
+            new_population = self._crossing(elit_population)
             self._mutation(new_population, K, p)
-
             self.population = new_population.copy()
 
     def evaluate(self, X, y):
         """ Forward propagation on the best individual in the population """
-        best_nn = min(self.population, key=lambda nn: nn.diff_squared)
-        total_diff_squared = 0.0
+        best_nn = min(self.population, key=lambda nn: nn.mse)
+        total_mse = 0.0
 
         for x, target in zip(X, y):
             outputs = x
@@ -154,7 +149,7 @@ class Population:
                 if i != len(best_nn.weights) - 1:  # Skip sigmoid for last layer
                     outputs = sigmoid(outputs)
 
-            diff_squared = np.mean(np.square(target - outputs))
-            total_diff_squared += diff_squared
+            mse = np.mean(np.square(target - outputs))
+            total_mse += mse
 
-        return total_diff_squared / len(X)
+        return total_mse / len(X)
