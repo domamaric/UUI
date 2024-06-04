@@ -3,7 +3,6 @@ import numpy as np
 import random
 
 
-# Activation function
 def sigmoid(x):
     """ Calculate sigmoid value of value x. """
     return 1 / (1 + np.exp(-x))
@@ -88,65 +87,71 @@ class Population:
     def _propagation(self, X, y):
         """Performs forward propagation for each neural network."""
         for nn in self.population:
-            # breakpoint()
-            outputs = X
+            total_diff_squared = 0.0
 
-            for i, (weights, biases) in enumerate(zip(nn.weights, nn.biases)):
-                outputs = np.dot(outputs, weights.T) + biases
+            for x, target in zip(X, y):
+                outputs = x
 
-                # Skip sigmoid for last layer
-                if i != len(nn.weights) - 1:
-                    outputs = sigmoid(outputs)
+                for i, (weights, biases) in enumerate(zip(nn.weights, nn.biases)):
+                    outputs = np.dot(outputs, weights.T) + biases
 
-            err = np.mean(np.square(y - outputs))
-            nn.diff_squared = err
+                    if i != len(nn.weights) - 1:  # Skip sigmoid for last layer
+                        outputs = sigmoid(outputs)
+
+                diff_squared = np.mean(np.square(target - outputs))
+                total_diff_squared += diff_squared
+
+            nn.diff_squared = total_diff_squared / len(X)
+
+    def _crossing(self, sorted_population):
+        """Perform crossing for generating new individuals."""
+        new_population = []
+
+        while len(new_population) < self.popsize:
+            neural_network1 = random.choice(sorted_population)
+
+            if len(new_population) == 0:
+                neural_network2 = random.choice(sorted_population)
+            else:
+                neural_network2 = random.choice(new_population)
+
+            # Create copies of weights and biases
+            new_weights = [(n1 + n2) / 2 for n1, n2 in zip(neural_network1.weights, neural_network2.weights)]
+            new_biases = [(n1 + n2) / 2 for n1, n2 in zip(neural_network1.biases, neural_network2.biases)]
+
+            nn = NeuralNetwork(self.input_dim, self.hidden_dims, self.output_dim)
+            nn.weights = new_weights
+            nn.biases = new_biases
+            new_population.append(nn)
+
+        return new_population
+
+    def _mutation(self, new_population, K, p):
+        """Perform mutation on the new population."""
+        for current_pop in new_population:
+            for weight in current_pop.weights:
+                weight += np.random.normal(0, K, size=weight.shape) * (np.random.random() < p)
+
+            for bias in current_pop.biases:
+                bias += np.random.normal(0, K, size=bias.shape) * (np.random.random() < p)
 
     def train(self, X, y, epochs, K, p, elit):
         """ Performs training using Genetic Algorithm. """
         for i in range(1, epochs + 1):
             self._propagation(X, y)
-            # Every 2 000 iteration print current train error
-            if i % 2000 == 0:
-                best_population = min(
-                    self.population, key=lambda nn: nn.diff_squared)
+
+            if i % 2000 == 0:  # Every 100 iteration print current train error
+                best_population = min(self.population, key=lambda nn: nn.diff_squared)
                 print(f"[Train error @{i}]: {best_population.diff_squared}")
 
             # Elitism and selection
-            sortedPopulation = sorted(self.population,
-                                      key=lambda nn: nn.diff_squared)[:elit]
+            sorted_population = sorted(self.population, key=lambda nn: nn.diff_squared)[:elit]
 
-            # Crossing
-            newPopulation = []
-            while len(newPopulation) < self.popsize:
-                neuralNetwork1 = random.choice(sortedPopulation)
+            new_population = self._crossing(sorted_population)
 
-                if len(newPopulation) == 0:
-                    neuralNetwork2 = random.choice(sortedPopulation)
-                else:
-                    neuralNetwork2 = random.choice(newPopulation)
+            self._mutation(new_population, K, p)
 
-                newWeights = [(n1 + n2) / 2 for n1, n2 in zip(
-                    neuralNetwork1.weights, neuralNetwork2.weights)]
-                newB = [(n1 + n2) / 2 for n1, n2 in zip(
-                    neuralNetwork1.biases, neuralNetwork2.biases)]
-
-                nn = NeuralNetwork(
-                    self.input_dim, self.hidden_dims, self.output_dim)
-                nn.weights = newWeights.copy()
-                nn.biases = newB.copy()
-                newPopulation.append(nn)
-
-            # Mutation
-            for currentPop in newPopulation:
-                for w in currentPop.weights:
-                    w += np.random.normal(0, K, size=w.shape) * \
-                        (np.random.random() < p)
-
-                for b in currentPop.biases:
-                    b += np.random.normal(0, K, size=b.shape) * \
-                        (np.random.random() < p)
-
-            self.population = newPopulation.copy()
+            self.population = new_population.copy()
 
     def evaluate(self, X, y):
         """ Forward propagation on the best individual in the population """
