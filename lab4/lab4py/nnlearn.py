@@ -27,10 +27,10 @@ class NeuralNetwork:
                        for i in range(len(layer_dims) - 1)]
 
     def __repr__(self):
-        return f"{self.mse}\n"
+        return f"{self.weights}\n"
 
     def __str__(self):
-        return f"{self.mse}\n"
+        return f"{self.weights}\n"
 
 
 class Population:
@@ -92,6 +92,8 @@ class Population:
                 mutation_mask = np.random.random(biases.shape) < p
                 biases += np.random.normal(0, K, biases.shape) * mutation_mask
 
+        return new_population
+
     def train(self, X, y, epochs, K, p, elit):
         """Performs training using Genetic Algorithm."""
         for i in range(1, epochs + 1):
@@ -103,9 +105,8 @@ class Population:
 
             # Elitism and selection
             elit_population = sorted(self.population, key=lambda nn: nn.mse)[:elit]
-            new_population = self._crossing(elit_population)
-            self._mutation(new_population, K, p)
-            self.population = new_population
+            crossed_population = self._crossing(elit_population)
+            self.population = self._mutation(crossed_population, K, p)
 
     def evaluate(self, X, y):
         """Forward propagation on the best individual in the population"""
