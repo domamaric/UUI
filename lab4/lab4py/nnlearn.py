@@ -30,7 +30,18 @@ class NeuralNetwork:
         return f"{self.weights}\n"
 
     def __str__(self):
-        return f"{self.weights}\n"
+        layer_info = f"Neural Network Structure\n{'-'*50}"
+        total_params = 0
+
+        for i, (w, b) in enumerate(zip(self.weights, self.biases)):
+            params = w.size + b.size
+            total_params += params
+            layer_info += (f"\nLayer {i + 1}: "
+                           f"Output shape: {w.shape} "
+                           f"Parameters #: {params}\n")
+
+        layer_info += f"{'='*50}\nTotal Parameters: {total_params}"
+        return layer_info
 
 
 class Population:
