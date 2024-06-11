@@ -4,6 +4,9 @@ This repository contains the solutions for four programming assignments in the "
 
 ## Project Overview
 
+Project also contains `aco` folder which contains Ant colony optimization algorithm which is used to solve traveling salesman problem. Task is **not** part of laboratory assignments. I opted
+to try and implement it for practice purposes. Folder contains one test case.
+
 ### Lab Assignments
 
 1. **State Space Search Analysis**
@@ -29,8 +32,10 @@ This repository contains the solutions for four programming assignments in the "
 
 ### Installation
 
-1. Clone the repository:
+1. Clone the repository and position accordingly:
 
    ```bash
    git clone https://github.com/domamaric/UUI.git
    cd UUI/
+
+2. Play with code as you like.
