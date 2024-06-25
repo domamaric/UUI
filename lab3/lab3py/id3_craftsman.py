@@ -83,7 +83,7 @@ class ID3:
                 best_info_gain = info_gain
                 best_attribute = i
 
-        return best_attribute
+        return best_attribute, best_info_gain
 
     def create_decision_tree(self, data, attributes, curr_depth=1):
         labels = [item[-1] for item in data]
@@ -96,8 +96,10 @@ class ID3:
             majority_vote = label_counts.most_common(1)[0][0]
             return majority_vote
 
-        best_attribute = self.select_best_attribute(data)
+        best_attribute, best_info_gain = self.select_best_attribute(data)
         best_attribute_label = attributes[best_attribute]
+        print(f"IG({best_attribute_label}): {best_info_gain:.3f}", end=" ")
+
         decision_tree = {best_attribute_label: {}}
 
         attribute_values = [item[best_attribute] for item in data]
@@ -122,7 +124,7 @@ class ID3:
         self.depth = depth
 
         self.decision_tree = self.create_decision_tree(data, attributes)
-        print("[BRANCHES]:")
+        print("\n[BRANCHES]:")
         self.print_tree(self.decision_tree)
 
     def predict_single(self, sample, decision_tree):

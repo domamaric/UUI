@@ -1,0 +1,8 @@
+eval,izvodenje,paradigma,tipovi,y
+lijena,kompajler,imperativna,staticka,0
+striktna,interpreter,deklarativna,dinamicka,0
+lijena,kompajler,imperativna,dinamicka,0
+lijena,interpreter,hibridna,staticka,0
+striktna,interpreter,imperativna,staticka,1
+lijena,kompajler,hibridna,dinamicka,1
+striktna,kompajler,hibridna,dinamicka,1
