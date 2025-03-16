@@ -1,24 +1,25 @@
 import argparse
-import os
 import pathlib  # It is better to provide Path object than pure string
+
 import pathfinder
+import file_parser
 
 
 def main(argv):
-    sts, initial, target = pathfinder.read_space_state(pathlib.Path(argv.ss))
+    start_state, goal_states, transitions = file_parser.transitions_parser(pathlib.Path(argv.ss))
     search_alg = argv.alg
 
     if search_alg == 'bfs':
-        algorithm = pathfinder.Bfs(sts)
+        algorithm = pathfinder.Bfs(transitions)
     elif search_alg == 'ucs':
-        algorithm = pathfinder.Ucs(sts)
+        algorithm = pathfinder.Ucs(transitions)
     elif search_alg == 'astar':
-        heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
-        algorithm = pathfinder.Astar(sts, heuristic)
+        heuristics = file_parser.heuristics_parser(pathlib.Path(argv.h))
+        algorithm = pathfinder.Astar(transitions, heuristics)
 
     # Do a state search
     if search_alg is not None:
-        path, cost = algorithm.search(initial, target)
+        path, cost = algorithm.search(start_state, goal_states)
         if path is not None:
             print('[FOUND_SOLUTION]: yes')
             print('[STATES_VISITED]:', 10)
@@ -28,8 +29,8 @@ def main(argv):
 
     if argv.check_optimistic:
         print('# HEURISTIC-OPTIMISTIC', argv.h)
-        heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
-        optimistic = pathfinder.is_optimistic(heuristic, sts, target)
+        heuristics = file_parser.heuristics_parser(pathlib.Path(argv.h))
+        optimistic = pathfinder.is_optimistic(heuristics, transitions, goal_states)
 
         if optimistic:
             print('[CONCLUSION]: Heuristic is optimistic.')
@@ -38,8 +39,8 @@ def main(argv):
 
     if argv.check_consistent:
         print('# HEURISTIC-CONSISTENT', argv.h)
-        heuristic = pathfinder.read_heuristic(pathlib.Path(argv.h))
-        consistent = pathfinder.is_consistent(heuristic, sts)
+        heuristics = file_parser.heuristics_parser(pathlib.Path(argv.h))
+        consistent = pathfinder.is_consistent(heuristics, transitions)
 
         if consistent:
             print('[CONCLUSION]: Heuristic is consistent.')
