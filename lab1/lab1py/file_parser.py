@@ -1,35 +1,38 @@
-import ctypes
-import cProfile
-import timeit
+def transitions_parser(filepath):
+    start_state = None
+    goal_states = []
+    transitions = {}
 
-# Load the shared library
-file_parser_lib = ctypes.CDLL('./libparse.so')
+    with open(filepath, "r") as f:
+        file_lines = [line.rstrip() for line in f.readlines() if line[0] != "#"]
 
-StateCallback = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int)
+    start_state, goal_states = file_lines[0], file_lines[1].split()
 
-file_parser_lib.read_file_line_by_line.argtypes = [ctypes.c_char_p, StateCallback]
+    for line in file_lines[2:]:
+        current_state, transitions_part = line.split(':', 1)
+        current_state = current_state.strip()
+        
+        if current_state not in transitions:
+            transitions[current_state] = []
+        
+        for transition in transitions_part.strip().split():
 
-def read_file():
-    state_space = {}
+            next_state, cost = transition.rsplit(',', 1)
+            transitions[current_state].append((next_state, float(cost)))
 
-    def state_callback(state, next_state, cost):
-        state = state.decode("utf-8")
-        next_state = next_state.decode("utf-8")
+    return start_state, goal_states, transitions
 
-        if state not in state_space:
-            state_space[state] = []
 
-        state_space[state].append((next_state, cost))
+def heuristics_parser(filepath):
+    with open(filepath, "r") as f:
+        file_lines = [line.rstrip() for line in f.readlines() if line[0] != "#"]
+    
+    heuristics = {}
 
-    c_callback = StateCallback(state_callback)
+    for line in file_lines:
+        state, cost = line.split(':')
+        state = state.strip()
+        cost = cost.strip()
+        heuristics[state] = float(cost)
 
-    filename = "3x3_puzzle.txt"
-    c_filename = ctypes.c_char_p(filename.encode("utf-8"))
-
-    file_parser_lib.read_file_line_by_line(c_filename, c_callback)
-
-    return state_space
-
-if __name__ == "__main__":
-    # print(timeit.timeit("read_file()", setup="from __main__ import read_file", number=1))
-    cProfile.run('read_file()')
+    return heuristics
