@@ -1,4 +1,6 @@
 import heapq
+import re
+
 from collections import deque
 
 
@@ -87,7 +89,6 @@ def is_consistent(heuristic, state_space):
                     print(f"[CONDITION]: [OK] h({state}) <= h({successor_state}) + c: {state_heuristic} <= {successor_heuristic} + {cost}")
 
     return no_of_errors == 0
-
 
 
 class Algorithm:

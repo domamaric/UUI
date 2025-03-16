@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_SIZE 512
-
 typedef void (*LineCallback)(const char *a, const char *b);
 
 void read_file_line_by_line(const char *filename, LineCallback callback) {
@@ -13,8 +11,10 @@ void read_file_line_by_line(const char *filename, LineCallback callback) {
         return;
     }
 
-    char line_buff[MAX_SIZE];
-    while (fgets(line_buff, MAX_SIZE, file)) {
+    char *line_buff = NULL;
+    size_t line_size = 512;
+
+    while (getline(&line_buff, &line_size, file) != -1) {
         // Remove newline character at the end of the line
         size_t len = strlen(line_buff);
         if (len > 0 && line_buff[len - 1] == '\n') {
@@ -28,7 +28,7 @@ void read_file_line_by_line(const char *filename, LineCallback callback) {
         if (colon != NULL) {
             *colon = '\0';  // Replace ':' with '\0' to split the string
             char *key = line_buff;
-            char *values = colon + 1;
+            char *values = colon + 2;
 
             // Call the callback function with the preprocessed line
             callback(key, values);
